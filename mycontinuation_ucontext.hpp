@@ -1,10 +1,7 @@
 #pragma once
 
 #include <assert.h>
-extern "C"
-{
 #include <ucontext.h>
-}
 
 #include <algorithm>
 #include <cstddef>
@@ -153,7 +150,6 @@ inline activation_record_initializer::~activation_record_initializer()
 		delete current_rec;
 	}
 }
-
 
 struct forced_unwind
 {
@@ -393,7 +389,7 @@ class continuation
 template <typename Fn, typename = disable_overload<continuation, Fn>>
 continuation callcc(Fn&& fn)
 {
-	return callcc(std::allocator_arg, protected_fixedsize_stack(), std::forward<Fn>(fn));
+	return callcc(std::allocator_arg, protected_fixedsize_stack(4 * 1024 * 1024), std::forward<Fn>(fn));
 }
 
 template <typename StackAlloc, typename Fn>

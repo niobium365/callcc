@@ -102,21 +102,13 @@ class basic_protected_fixedsize_stack
 		const std::size_t size__ = (pages + 1) * traits_type::page_size();
 
 		// conform to POSIX.4 (POSIX.1b-1993, _POSIX_C_SOURCE=199309L)
-#if defined(MAP_ANON)
 		void* vp = ::mmap(0, size__, PROT_READ | PROT_WRITE, MAP_PRIVATE | MAP_ANON, -1, 0);
-#else
-		void* vp = ::mmap(0, size__, PROT_READ | PROT_WRITE, MAP_PRIVATE | MAP_ANONYMOUS, -1, 0);
-#endif
 		if (MAP_FAILED == vp)
 			throw std::bad_alloc();
 
 			// conforming to POSIX.1-2001
-#if defined(BOOST_DISABLE_ASSERTS)
-		::mprotect(vp, traits_type::page_size(), PROT_NONE);
-#else
 		const int result(::mprotect(vp, traits_type::page_size(), PROT_NONE));
 		assert(0 == result);
-#endif
 
 		stack_context sctx;
 		sctx.size = size__;
