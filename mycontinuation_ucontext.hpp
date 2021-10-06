@@ -47,6 +47,15 @@ static void entry_func(void* data) noexcept
 	record->run();
 }
 
+struct activation_record;
+struct activation_record_initializer
+{
+	inline thread_local static activation_record* current_rec;
+	inline thread_local static std::size_t counter;
+	activation_record_initializer() noexcept;
+	~activation_record_initializer();
+};
+
 struct activation_record
 {
 	ucontext_t uctx{};
@@ -57,7 +66,12 @@ struct activation_record
 	bool terminated{false};
 	bool force_unwind{false};
 
-	static activation_record*& current() noexcept;
+	static activation_record*& current() noexcept
+	{
+		// initialized the first time control passes; per thread
+		thread_local static activation_record_initializer initializer;
+		return activation_record_initializer::current_rec;
+	}
 
 	// used for toplevel-context
 	// (e.g. main context, thread-entry context)
@@ -123,11 +137,23 @@ struct activation_record
 	{}
 };
 
-struct activation_record_initializer
+inline activation_record_initializer::activation_record_initializer() noexcept
 {
-	activation_record_initializer() noexcept;
-	~activation_record_initializer();
-};
+	if (0 == counter++)
+	{
+		current_rec = new activation_record();
+	}
+}
+
+inline activation_record_initializer::~activation_record_initializer()
+{
+	if (0 == --counter)
+	{
+		assert(current_rec->is_main_context());
+		delete current_rec;
+	}
+}
+
 
 struct forced_unwind
 {

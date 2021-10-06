@@ -41,15 +41,15 @@ link_libraries(uv)
 project(MyProject)
 
 add_executable(foo "a.cpp" 
-continuation.cpp
-stack_traits.cpp
+#continuation.cpp
+#stack_traits.cpp
 )
 
 add_executable(b "b.cpp" 
-continuation.cpp
-stack_traits.cpp
+#continuation.cpp
+#stack_traits.cpp
 )
 add_executable(c "c.cpp" 
-continuation.cpp
-stack_traits.cpp
+#continuation.cpp
+#stack_traits.cpp
 )
